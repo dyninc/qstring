@@ -1,9 +1,12 @@
-.PHONY: all style test
+.PHONY: all coverage style test
 
 all: test
+
+coverage:
+	go test -v -cover -coverprofile=coverage.out
 
 style:
 	go vet
 
 test: style
-	go test -cover
+	go test -v -cover
