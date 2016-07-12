@@ -54,7 +54,12 @@ func (d *decoder) unmarshal(v interface{}) error {
 		return &InvalidUnmarshalError{reflect.TypeOf(v)}
 	}
 
-	return d.value(rv)
+	switch val := v.(type) {
+	case Unmarshaller:
+		return val.UnmarshalQuery(d.data)
+	default:
+		return d.value(rv)
+	}
 }
 
 func (d *decoder) value(val reflect.Value) error {

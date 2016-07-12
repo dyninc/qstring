@@ -63,7 +63,12 @@ func (e *encoder) marshal() (url.Values, error) {
 		return nil, &InvalidMarshalError{reflect.TypeOf(e.data)}
 	}
 
-	return e.value(rv)
+	switch val := e.data.(type) {
+	case Marshaller:
+		return val.MarshalQuery()
+	default:
+		return e.value(rv)
+	}
 }
 
 func (e *encoder) value(val reflect.Value) (url.Values, error) {

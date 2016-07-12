@@ -266,3 +266,30 @@ func TestMarshalNestedPtrs(t *testing.T) {
 		}
 	}
 }
+
+func (u *MarshalInterfaceTest) MarshalQuery() (url.Values, error) {
+	return url.Values{"names": u.Names}, nil
+}
+
+func TestMarshaller(t *testing.T) {
+	s := &MarshalInterfaceTest{Names: []string{"foo", "bar"}}
+
+	testIO := []struct {
+		inp  *MarshalInterfaceTest
+		vals url.Values
+		err  error
+	}{
+		{s, url.Values{"names": s.Names}, nil},
+	}
+
+	for _, test := range testIO {
+		v, err := MarshalValues(test.inp)
+		if err != test.err {
+			t.Errorf("Expected Marshaller to return %s, but got %s instead", test.err, err)
+		}
+
+		if len(v) != len(test.vals) {
+			t.Errorf("Expected %q, got %q instead", test.vals, v)
+		}
+	}
+}

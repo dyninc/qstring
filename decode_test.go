@@ -1,6 +1,7 @@
 package qstring
 
 import (
+	"errors"
 	"net/url"
 	"testing"
 	"time"
@@ -176,6 +177,38 @@ func TestUnmarshalInvalidTypes(t *testing.T) {
 
 		if err.Error() != test.errString {
 			t.Errorf("Got %q error, expected %q", err.Error(), test.errString)
+		}
+	}
+}
+
+var errNoNames = errors.New("No Names Provided")
+
+type MarshalInterfaceTest struct {
+	Names []string
+}
+
+func (u *MarshalInterfaceTest) UnmarshalQuery(v url.Values) error {
+	var ok bool
+	if u.Names, ok = v["names"]; ok {
+		return nil
+	}
+	return errNoNames
+}
+
+func TestUnmarshaller(t *testing.T) {
+	testIO := []struct {
+		inp      url.Values
+		expected interface{}
+	}{
+		{url.Values{"names": []string{"foo", "bar"}}, nil},
+		{make(url.Values), errNoNames},
+	}
+
+	s := &MarshalInterfaceTest{Names: []string{}}
+	for _, test := range testIO {
+		err := Unmarshal(test.inp, s)
+		if err != test.expected {
+			t.Errorf("Expected Unmarshaller to return %s, but got %s instead", test.expected, err)
 		}
 	}
 }
