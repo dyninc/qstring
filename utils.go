@@ -2,6 +2,7 @@ package qstring
 
 import (
 	"reflect"
+	"time"
 )
 
 // isEmptyValue returns true if the provided reflect.Value
@@ -19,6 +20,13 @@ func isEmptyValue(v reflect.Value) bool {
 		return v.Float() == 0
 	case reflect.Interface, reflect.Ptr:
 		return v.IsNil()
+	case reflect.Struct:
+		switch t := v.Interface().(type) {
+		case time.Time:
+			return t.IsZero()
+		case ComparativeTime:
+			return t.Time.IsZero()
+		}
 	}
 	return false
 }
