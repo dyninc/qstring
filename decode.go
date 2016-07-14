@@ -63,8 +63,10 @@ func (d *decoder) unmarshal(v interface{}) error {
 }
 
 func (d *decoder) value(val reflect.Value) error {
+	var err error
 	elem := val.Elem()
 	typ := elem.Type()
+
 	for i := 0; i < elem.NumField(); i++ {
 		// pull out the qstring struct tag
 		elemField := elem.Field(i)
@@ -85,14 +87,17 @@ func (d *decoder) value(val reflect.Value) error {
 		if query, ok := d.data[qstring]; ok {
 			switch k := typField.Type.Kind(); k {
 			case reflect.Slice:
-				d.coerceSlice(query, k, elemField)
+				err = d.coerceSlice(query, k, elemField)
 			default:
-				d.coerce(query[0], k, elemField)
+				err = d.coerce(query[0], k, elemField)
 			}
 		} else if typField.Type.Kind() == reflect.Struct {
 			if elemField.CanAddr() {
-				d.value(elemField.Addr())
+				err = d.value(elemField.Addr())
 			}
+		}
+		if err != nil {
+			return err
 		}
 	}
 	return nil
@@ -132,6 +137,12 @@ func (d *decoder) coerce(query string, target reflect.Kind, field reflect.Value)
 		case time.Time:
 			var t time.Time
 			t, err = time.Parse(time.RFC3339, query)
+			if err == nil {
+				field.Set(reflect.ValueOf(t))
+			}
+		case ComparativeTime:
+			t := *NewComparativeTime()
+			err = t.Parse(query)
 			if err == nil {
 				field.Set(reflect.ValueOf(t))
 			}

@@ -77,7 +77,7 @@ func TestUnmarshall(t *testing.T) {
 		"meds":     []string{"9", "10", "11"},
 		"bigs":     []string{"12", "13", "14"},
 		"upages":   []string{"2", "3", "4"},
-		"uids":     []string{"5, 6, 7"},
+		"uids":     []string{"5", "6", "7"},
 		"usmalls":  []string{"8", "9", "10"},
 		"umeds":    []string{"9", "10", "11"},
 		"ubigs":    []string{"12", "13", "14"},

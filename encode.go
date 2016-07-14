@@ -132,6 +132,8 @@ func marshalValue(field reflect.Value, source reflect.Kind) string {
 		switch field.Interface().(type) {
 		case time.Time:
 			return field.Interface().(time.Time).Format(time.RFC3339)
+		case ComparativeTime:
+			return field.Interface().(ComparativeTime).String()
 		}
 	}
 	return ""
@@ -140,7 +142,7 @@ func marshalValue(field reflect.Value, source reflect.Kind) string {
 func marshalStruct(output url.Values, qstring string, field reflect.Value, source reflect.Kind) error {
 	var err error
 	switch field.Interface().(type) {
-	case time.Time:
+	case time.Time, ComparativeTime:
 		output.Set(qstring, marshalValue(field, source))
 	default:
 		var vals url.Values

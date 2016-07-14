@@ -1,7 +1,6 @@
 package qstring
 
 import (
-	"fmt"
 	"net/url"
 	"strings"
 	"testing"
@@ -104,7 +103,6 @@ func TestComparativeTimeMarshal(t *testing.T) {
 	expected := []string{"created=>2006-01-02T15:04:05Z",
 		"modified=<=2016-01-02T15:04:05-07:00"}
 	for _, ts := range expected {
-		fmt.Println(ts)
 		if !strings.Contains(unescaped, ts) {
 			t.Errorf("Expected query string %s to contain %s", unescaped, ts)
 		}
