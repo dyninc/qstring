@@ -14,8 +14,8 @@ type Marshaller interface {
 	MarshalQuery() (url.Values, error)
 }
 
-// MarshalValues marshals the provided struct into a url.Values collection
-func MarshalValues(v interface{}) (url.Values, error) {
+// Marshal marshals the provided struct into a url.Values collection
+func Marshal(v interface{}) (url.Values, error) {
 	var e encoder
 	e.init(v)
 	return e.marshal()
@@ -23,8 +23,8 @@ func MarshalValues(v interface{}) (url.Values, error) {
 
 // Marshal marshals the provided struct into a raw query string and returns a
 // conditional error
-func Marshal(v interface{}) (string, error) {
-	vals, err := MarshalValues(v)
+func MarshalString(v interface{}) (string, error) {
+	vals, err := Marshal(v)
 	if err != nil {
 		return "", err
 	}
@@ -39,13 +39,13 @@ type InvalidMarshalError struct {
 
 func (e InvalidMarshalError) Error() string {
 	if e.Type == nil {
-		return "qstring: Marshal(nil)"
+		return "qstring: MarshalString(nil)"
 	}
 
 	if e.Type.Kind() != reflect.Ptr {
-		return "qstring: Marshal(non-pointer " + e.Type.String() + ")"
+		return "qstring: MarshalString(non-pointer " + e.Type.String() + ")"
 	}
-	return "qstring: Marshal(nil " + e.Type.String() + ")"
+	return "qstring: MarshalString(nil " + e.Type.String() + ")"
 }
 
 type encoder struct {
@@ -147,7 +147,7 @@ func marshalStruct(output url.Values, qstring string, field reflect.Value, sourc
 	default:
 		var vals url.Values
 		if field.CanAddr() {
-			vals, err = MarshalValues(field.Addr().Interface())
+			vals, err = Marshal(field.Addr().Interface())
 		}
 
 		if err != nil {

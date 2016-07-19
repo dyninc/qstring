@@ -76,7 +76,7 @@ func TestComparativeTimeUnmarshal(t *testing.T) {
 	}
 }
 
-func TestComparativeTimeMarshal(t *testing.T) {
+func TestComparativeTimeMarshalString(t *testing.T) {
 	type Query struct {
 		Created  ComparativeTime
 		Modified ComparativeTime
@@ -90,7 +90,7 @@ func TestComparativeTimeMarshal(t *testing.T) {
 	updated.Parse(updatedTS)
 
 	q := &Query{*created, *updated}
-	result, err := Marshal(q)
+	result, err := MarshalString(q)
 	if err != nil {
 		t.Fatalf("Unable to marshal comparative timestamp: %s", err.Error())
 	}

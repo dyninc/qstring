@@ -47,7 +47,7 @@ func TestMarshallString(t *testing.T) {
 		"upages=3", "uids=5", "uids=6", "usmalls=8", "usmalls=9", "umeds=9",
 		"umeds=10", "ubigs=12", "ubigs=13", "float32s=6000", "float32s=6001",
 		"float64s=7000", "float64s=7001"}
-	query, err := Marshal(&ts)
+	query, err := MarshalString(&ts)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -121,7 +121,7 @@ func TestMarshallValues(t *testing.T) {
 		"float32s": []string{"6000", "6001", "6002"},
 		"float64s": []string{"7000", "7001", "7002"},
 	}
-	values, err := MarshalValues(&ts)
+	values, err := Marshal(&ts)
 	if err != nil {
 		t.Fatal(err.Error())
 	}
@@ -132,20 +132,20 @@ func TestMarshallValues(t *testing.T) {
 	}
 }
 
-func TestInvalidMarshal(t *testing.T) {
+func TestInvalidMarshalString(t *testing.T) {
 	var err error
 	var ts *TestStruct
 	testio := []struct {
 		inp       interface{}
 		errString string
 	}{
-		{inp: nil, errString: "qstring: Marshal(nil)"},
-		{inp: TestStruct{}, errString: "qstring: Marshal(non-pointer qstring.TestStruct)"},
-		{inp: ts, errString: "qstring: Marshal(nil *qstring.TestStruct)"},
+		{inp: nil, errString: "qstring: MarshalString(nil)"},
+		{inp: TestStruct{}, errString: "qstring: MarshalString(non-pointer qstring.TestStruct)"},
+		{inp: ts, errString: "qstring: MarshalString(nil *qstring.TestStruct)"},
 	}
 
 	for _, test := range testio {
-		_, err = Marshal(test.inp)
+		_, err = MarshalString(test.inp)
 		if err == nil {
 			t.Errorf("Expected invalid type error, got success instead")
 		}
@@ -168,7 +168,7 @@ func TestMarshalTime(t *testing.T) {
 	updatedTime, _ := time.Parse(time.RFC3339, updatedTS)
 
 	q := &Query{Created: createdTime, LastUpdated: updatedTime}
-	result, err := Marshal(q)
+	result, err := MarshalString(q)
 	if err != nil {
 		t.Fatalf("Unable to marshal timestamp: %s", err.Error())
 	}
@@ -203,7 +203,7 @@ func TestMarshalNested(t *testing.T) {
 		Paging: Paging{Page: 1, Limit: 50},
 	}
 
-	result, err := Marshal(params)
+	result, err := MarshalString(params)
 	if err != nil {
 		t.Fatalf("Unable to marshal nested struct: %s", err.Error())
 	}
@@ -243,7 +243,7 @@ func TestMarshalNestedPtrs(t *testing.T) {
 		Paging: &Paging{Page: 1, Limit: 50},
 	}
 
-	result, err := Marshal(params)
+	result, err := MarshalString(params)
 	if err != nil {
 		t.Fatalf("Unable to marshal nested struct: %s", err.Error())
 	}
@@ -284,7 +284,7 @@ func TestMarshaller(t *testing.T) {
 	}
 
 	for _, test := range testIO {
-		v, err := MarshalValues(test.inp)
+		v, err := Marshal(test.inp)
 		if err != test.err {
 			t.Errorf("Expected Marshaller to return %s, but got %s instead", test.err, err)
 		}

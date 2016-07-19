@@ -80,7 +80,7 @@ func main() {
 		Limit: 50,
 		Page: 1,
 	}
-	q, err := qstring.Marshal(query)
+	q, err := qstring.MarshalString(query)
 	fmt.Println(q)
 	// Output: names=foo&names=bar&limit=50&page=1
 }
@@ -110,7 +110,7 @@ func main() {
 		Limit: 50,
 		Page: 1,
 	}
-	q, err := qstring.MarshalValues(query)
+	q, err := qstring.Marshal(query)
 	fmt.Println(q)
 	// Output: map[names:[foo, bar] limit:[50] page:[1]]
 }

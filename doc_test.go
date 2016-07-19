@@ -28,7 +28,7 @@ func ExampleUnmarshal() {
 	// Output: &{Names:[foo bar] Limit:50 Page:1}
 }
 
-func ExampleMarshal() {
+func ExampleMarshalString() {
 	// Query is the http request query struct.
 	type Query struct {
 		Names []string
@@ -41,7 +41,7 @@ func ExampleMarshal() {
 		Limit: 50,
 		Page:  1,
 	}
-	q, _ := qstring.Marshal(query)
+	q, _ := qstring.MarshalString(query)
 	os.Stdout.Write([]byte(q))
 	// Output: limit=50&names=foo&names=bar&page=1
 }

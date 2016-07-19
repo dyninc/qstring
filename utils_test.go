@@ -85,7 +85,7 @@ func TestOmitEmpty(t *testing.T) {
 	}
 
 	for _, test := range testio {
-		values, _ := MarshalValues(&test)
+		values, _ := Marshal(&test)
 
 		_, found := values["conditional"]
 		if found && test.omit {
