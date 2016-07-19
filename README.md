@@ -28,13 +28,13 @@ type Query struct {
 }
 
 func handler(w http.ResponseWriter, req *http.Request) {
-  query := &Query{}
-  err := qstring.Unmarshal(req.Url.Query(), query)
-  if err != nil {
-    http.Error(w, err.Error(), http.StatusBadRequest)
-  }
+	query := &Query{}
+	err := qstring.Unmarshal(req.Url.Query(), query)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
 
-  // ... run conditional logic based on provided query parameters
+	// ... run conditional logic based on provided query parameters
 }
 ```
 
@@ -75,14 +75,14 @@ type Query struct {
 }
 
 func main() {
-  query := &Query{
+	query := &Query{
 		Names: []string{"foo", "bar"},
 		Limit: 50,
 		Page: 1,
 	}
 	q, err := qstring.Marshal(query)
 	fmt.Println(q)
-  // Output: names=foo&names=bar&limit=50&page=1
+	// Output: names=foo&names=bar&limit=50&page=1
 }
 ```
 
@@ -112,7 +112,7 @@ func main() {
 	}
 	q, err := qstring.MarshalValues(query)
 	fmt.Println(q)
-  // Output: map[names:[foo, bar] limit:[50] page:[1]]
+	// Output: map[names:[foo, bar] limit:[50] page:[1]]
 }
 ```
 
@@ -142,13 +142,6 @@ type Query struct {
 }
 ```
 
-## Additional Notes
-* All Timestamps are assumed to be in RFC3339 format
-* A struct field tag of `qstring` is supported and supports all of the features
-you've come to know and love from Go (un)marshalers.
-  * A field tag with a value of `qstring:"-"` instructs `qstring` to ignore the field.
-  * A field tag with an the `omitempty` option set will be ignored `qstring:"name,omitempty"`
-
 ### Complex Structures
 Again, in the spirit of other Unmarshaling libraries, `qstring` allows for some
 more complex types, such as pointers and time.Time fields. A more complete
@@ -176,6 +169,14 @@ type Query struct {
 	Modified time.Time
 }
 ```
+
+## Additional Notes
+* All Timestamps are assumed to be in RFC3339 format
+* A struct field tag of `qstring` is supported and supports all of the features
+you've come to know and love from Go (un)marshalers.
+  * A field tag with a value of `qstring:"-"` instructs `qstring` to ignore the field.
+  * A field tag with an the `omitempty` option set will be ignored if the field
+	being marshaled has a zero value. `qstring:"name,omitempty"`
 
 ### Custom Fields
 In order to facilitate more complex queries `qstring` also provides some custom
