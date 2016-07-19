@@ -2,6 +2,9 @@
 
 all: test
 
+benchmark:
+	go test -benchmem -bench=.
+
 coverage:
 	go test -v -cover -coverprofile=coverage.out
 

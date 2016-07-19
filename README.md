@@ -185,3 +185,11 @@ Currently the following custom fields are provided:
 
 * `qstring.ComparativeTime` - Supports timestamp query parameters with optional
 logical operators (<, >, <=, >=) such as `?created<=2006-01-02T15:04:05Z`
+
+
+## Benchmarks
+```
+BenchmarkUnmarshall-4 	  500000	      2711 ns/op	     448 B/op	      23 allocs/op
+BenchmarkRawPLiteral-4	 1000000	      1675 ns/op	     448 B/op	      23 allocs/op
+ok  	github.com/dyninc/qstring	3.163s
+```
