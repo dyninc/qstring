@@ -133,6 +133,12 @@ func (d *decoder) coerce(query string, target reflect.Kind, field reflect.Value)
 			field.SetFloat(c.(float64))
 		}
 	case reflect.Struct:
+		// unescape the query parameter before attempting to parse it
+		query, err = url.QueryUnescape(query)
+		if err != nil {
+			return err
+		}
+
 		switch field.Interface().(type) {
 		case time.Time:
 			var t time.Time
