@@ -127,7 +127,8 @@ func TestMarshallValues(t *testing.T) {
 	}
 
 	if len(values) != len(expected) {
-		t.Errorf("Expected %d fields, got %d", len(expected), len(values))
+		t.Errorf("Expected %d fields, got %d. Hidden is %q",
+			len(expected), len(values), values["hidden"])
 	}
 }
 

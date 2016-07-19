@@ -3,6 +3,7 @@ package qstring
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestIsEmptyValue(t *testing.T) {
@@ -27,6 +28,11 @@ func TestIsEmptyValue(t *testing.T) {
 		{inp: reflect.ValueOf(&TestStruct{}), expected: false},
 		{inp: reflect.ValueOf(ts), expected: true},
 		{inp: reflect.ValueOf(nil), expected: false},
+		{inp: reflect.ValueOf(time.Time{}), expected: true},
+		{inp: reflect.ValueOf(time.Now()), expected: false},
+		{inp: reflect.ValueOf(*NewComparativeTime()), expected: true},
+		{inp: reflect.ValueOf(ComparativeTime{Operator: "=", Time: time.Now()}),
+			expected: false},
 	}
 
 	var result bool

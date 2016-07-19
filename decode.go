@@ -71,7 +71,7 @@ func (d *decoder) value(val reflect.Value) error {
 		// pull out the qstring struct tag
 		elemField := elem.Field(i)
 		typField := typ.Field(i)
-		qstring := typField.Tag.Get(Tag)
+		qstring, _ := parseTag(typField.Tag.Get(Tag))
 		if qstring == "" {
 			// resolvable fields must have at least the `flag` struct tag
 			qstring = strings.ToLower(typField.Name)

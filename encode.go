@@ -81,7 +81,7 @@ func (e *encoder) value(val reflect.Value) (url.Values, error) {
 		// pull out the qstring struct tag
 		elemField := elem.Field(i)
 		typField := typ.Field(i)
-		qstring := typField.Tag.Get(Tag)
+		qstring, omit := parseTag(typField.Tag.Get(Tag))
 		if qstring == "" {
 			// resolvable fields must have at least the `flag` struct tag
 			qstring = strings.ToLower(typField.Name)
@@ -89,7 +89,7 @@ func (e *encoder) value(val reflect.Value) (url.Values, error) {
 
 		// determine if this is an unsettable field or was explicitly set to be
 		// ignored
-		if !elemField.CanSet() || qstring == "-" || isEmptyValue(elemField) {
+		if !elemField.CanSet() || qstring == "-" || (omit && isEmptyValue(elemField)) {
 			continue
 		}
 
