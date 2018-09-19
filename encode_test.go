@@ -294,3 +294,40 @@ func TestMarshaller(t *testing.T) {
 		}
 	}
 }
+type MyText []byte
+type MyOtherText []byte
+
+type MyStruct struct {
+	Text MyText
+	Other MyOtherText
+}
+
+func (m MyText) MarshalText() ([]byte, error) {
+	return []byte(m), nil
+}
+func (m MyOtherText) String() string {
+	return string(m)
+}
+
+func TestMarshalTextMarshalType(t *testing.T) {
+	el := MyStruct{ Text: MyText("example string"), Other: MyOtherText("second example")}
+
+	result, err := MarshalString(&el)
+	if err != nil {
+		t.Fatalf("Unable to marshal type %T: %s", el, err.Error())
+	}
+
+	var unescaped string
+	unescaped, err = url.QueryUnescape(result)
+	if err != nil {
+		t.Fatalf("Unable to unescape query string %q: %q", result, err.Error())
+	}
+
+	// ensure fields we expect to be present are
+	expected := []string{"text=example string", "other=second example"}
+	for _, q := range expected {
+		if !strings.Contains(unescaped, q) {
+			t.Errorf("Expected query string %s to contain %s", unescaped, q)
+		}
+	}
+}

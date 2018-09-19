@@ -1,6 +1,8 @@
 package qstring
 
 import (
+	"encoding"
+	"fmt"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -71,6 +73,9 @@ func (e *encoder) marshal() (url.Values, error) {
 	}
 }
 
+var textMarshallerElem = reflect.TypeOf(new(encoding.TextMarshaler)).Elem()
+var stringerElem = reflect.TypeOf(new(fmt.Stringer)).Elem()
+
 func (e *encoder) value(val reflect.Value) (url.Values, error) {
 	elem := val.Elem()
 	typ := elem.Type()
@@ -93,6 +98,15 @@ func (e *encoder) value(val reflect.Value) (url.Values, error) {
 			continue
 		}
 
+		if elemField.Type().Implements(textMarshallerElem) {
+			byt, _ := elemField.Interface().(encoding.TextMarshaler).MarshalText()
+			output.Set(qstring, string(byt))
+			continue
+		}
+		if elemField.Type().Implements(stringerElem) {
+			output.Set(qstring, elemField.Interface().(fmt.Stringer).String())
+			continue
+		}
 		// only do work if the current fields query string parameter was provided
 		switch k := typField.Type.Kind(); k {
 		default:
@@ -130,6 +144,9 @@ func marshalValue(field reflect.Value, source reflect.Kind) string {
 		return strconv.FormatFloat(field.Float(), 'G', -1, 64)
 	case reflect.Struct:
 		switch field.Interface().(type) {
+		case encoding.TextMarshaler:
+			byt, _ := field.Interface().(encoding.TextMarshaler).MarshalText()
+			return string(byt)
 		case time.Time:
 			return field.Interface().(time.Time).Format(time.RFC3339)
 		case ComparativeTime:
