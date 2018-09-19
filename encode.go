@@ -98,13 +98,9 @@ func (e *encoder) value(val reflect.Value) (url.Values, error) {
 			continue
 		}
 
-		if elemField.Type().Implements(textMarshallerElem) {
-			byt, _ := elemField.Interface().(encoding.TextMarshaler).MarshalText()
-			output.Set(qstring, string(byt))
-			continue
-		}
-		if elemField.Type().Implements(stringerElem) {
-			output.Set(qstring, elemField.Interface().(fmt.Stringer).String())
+		// verify if the element type implements compatible interfaces
+		if val, ok := compatibleInterfaceValue(elemField); ok {
+			output.Set(qstring, val)
 			continue
 		}
 		// only do work if the current fields query string parameter was provided
@@ -130,7 +126,21 @@ func marshalSlice(field reflect.Value) []string {
 	return out
 }
 
+func compatibleInterfaceValue(field reflect.Value) (string, bool) {
+	if field.Type().Implements(textMarshallerElem) {
+		byt, _ := field.Interface().(encoding.TextMarshaler).MarshalText()
+		return string(byt), true
+	}
+	if field.Type().Implements(stringerElem) {
+		return field.Interface().(fmt.Stringer).String(), true
+	}
+	return "", false
+}
+
 func marshalValue(field reflect.Value, source reflect.Kind) string {
+	if val, ok := compatibleInterfaceValue(field); ok {
+		return val
+	}
 	switch source {
 	case reflect.String:
 		return field.String()
