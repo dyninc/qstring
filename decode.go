@@ -71,7 +71,7 @@ func (d *decoder) value(val reflect.Value) error {
 		// pull out the qstring struct tag
 		elemField := elem.Field(i)
 		typField := typ.Field(i)
-		qstring, _, _ := parseTag(typField.Tag.Get(Tag))
+		qstring, _, comma := parseTag(typField.Tag.Get(Tag))
 		if qstring == "" {
 			// resolvable fields must have at least the `flag` struct tag
 			qstring = strings.ToLower(typField.Name)
@@ -87,7 +87,7 @@ func (d *decoder) value(val reflect.Value) error {
 		if query, ok := d.data[qstring]; ok {
 			switch k := typField.Type.Kind(); k {
 			case reflect.Slice:
-				err = d.coerceSlice(query, k, elemField)
+				err = d.coerceSlice(query, k, elemField, comma)
 			default:
 				err = d.coerce(query[0], k, elemField)
 			}
@@ -164,7 +164,7 @@ func (d *decoder) coerce(query string, target reflect.Kind, field reflect.Value)
 // and coerces each of the query parameter values into the destination type.
 // Should any of the provided query parameters fail to be coerced, an error is
 // returned and the entire slice will not be applied
-func (d *decoder) coerceSlice(query []string, target reflect.Kind, field reflect.Value) error {
+func (d *decoder) coerceSlice(query []string, target reflect.Kind, field reflect.Value, comma bool) error {
 	var err error
 	sliceType := field.Type().Elem()
 	coerceKind := sliceType.Kind()
@@ -172,7 +172,13 @@ func (d *decoder) coerceSlice(query []string, target reflect.Kind, field reflect
 	// Create a pointer to a slice value and set it to the slice
 	slice := reflect.New(sl.Type())
 	slice.Elem().Set(sl)
-	for _, q := range query {
+	var elements []string
+	if comma && len(query) > 0 {
+		elements = strings.Split(query[0], ",")
+	} else {
+		elements = query
+	}
+	for _, q := range elements {
 		val := reflect.New(sliceType).Elem()
 		err = d.coerce(q, coerceKind, val)
 		if err != nil {

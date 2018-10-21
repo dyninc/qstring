@@ -30,13 +30,21 @@ type TestStruct struct {
 	Float64 float64
 
 	// slice fields
-	Fields   []string `qstring:"fields"`
-	DoFields []bool   `qstring:"dofields"`
-	Counts   []int
-	IDs      []int8
-	Smalls   []int16
-	Meds     []int32
-	Bigs     []int64
+	Fields    []string `qstring:"fields"`
+	DoFields  []bool   `qstring:"dofields"`
+	Counts    []int
+	IDs       []int8
+	Smalls    []int16
+	Meds      []int32
+	Bigs      []int64
+	FieldsC   []string  `qstring:"fieldsc,comma"`
+	DoFieldsC []bool    `qstring:"dofieldsc,comma"`
+	CountsC   []int     `qstring:",comma"`
+	IDsC      []int8    `qstring:",comma"`
+	SmallsC   []int16   `qstring:",comma"`
+	MedsC     []int32   `qstring:",comma"`
+	BigsC     []int64   `qstring:",comma"`
+	Float32sC []float32 `qstring:",comma"`
 
 	// uint fields
 	UPages  []uint
@@ -55,34 +63,42 @@ type TestStruct struct {
 func TestUnmarshall(t *testing.T) {
 	var ts TestStruct
 	query := url.Values{
-		"name":     []string{"SomeName"},
-		"do":       []string{"true"},
-		"page":     []string{"1"},
-		"id":       []string{"12"},
-		"small":    []string{"13"},
-		"med":      []string{"14"},
-		"big":      []string{"15"},
-		"upage":    []string{"2"},
-		"uid":      []string{"16"},
-		"usmall":   []string{"17"},
-		"umed":     []string{"18"},
-		"ubig":     []string{"19"},
-		"float32":  []string{"6000"},
-		"float64":  []string{"7000"},
-		"fields":   []string{"foo", "bar"},
-		"dofields": []string{"true", "false"},
-		"counts":   []string{"1", "2"},
-		"ids":      []string{"3", "4", "5"},
-		"smalls":   []string{"6", "7", "8"},
-		"meds":     []string{"9", "10", "11"},
-		"bigs":     []string{"12", "13", "14"},
-		"upages":   []string{"2", "3", "4"},
-		"uids":     []string{"5", "6", "7"},
-		"usmalls":  []string{"8", "9", "10"},
-		"umeds":    []string{"9", "10", "11"},
-		"ubigs":    []string{"12", "13", "14"},
-		"float32s": []string{"6000", "6001", "6002"},
-		"float64s": []string{"7000", "7001", "7002"},
+		"name":      []string{"SomeName"},
+		"do":        []string{"true"},
+		"page":      []string{"1"},
+		"id":        []string{"12"},
+		"small":     []string{"13"},
+		"med":       []string{"14"},
+		"big":       []string{"15"},
+		"upage":     []string{"2"},
+		"uid":       []string{"16"},
+		"usmall":    []string{"17"},
+		"umed":      []string{"18"},
+		"ubig":      []string{"19"},
+		"float32":   []string{"6000"},
+		"float64":   []string{"7000"},
+		"fields":    []string{"foo", "bar"},
+		"dofields":  []string{"true", "false"},
+		"counts":    []string{"1", "2"},
+		"ids":       []string{"3", "4", "5"},
+		"smalls":    []string{"6", "7", "8"},
+		"meds":      []string{"9", "10", "11"},
+		"bigs":      []string{"12", "13", "14"},
+		"fieldsc":   []string{"foo,bar"},
+		"dofieldsc": []string{"true,false"},
+		"countsc":   []string{"1,2"},
+		"idsc":      []string{"3,4,5"},
+		"smallsc":   []string{"6,7,8"},
+		"medsc":     []string{"9,10,11"},
+		"bigsc":     []string{"12,13,14"},
+		"float32sc": []string{"1.1,2.2,3.3"},
+		"upages":    []string{"2", "3", "4"},
+		"uids":      []string{"5", "6", "7"},
+		"usmalls":   []string{"8", "9", "10"},
+		"umeds":     []string{"9", "10", "11"},
+		"ubigs":     []string{"12", "13", "14"},
+		"float32s":  []string{"6000", "6001", "6002"},
+		"float64s":  []string{"7000", "7001", "7002"},
 	}
 
 	err := Unmarshal(query, &ts)
@@ -96,6 +112,26 @@ func TestUnmarshall(t *testing.T) {
 
 	if len(ts.Fields) != 2 {
 		t.Errorf("Expected 2 fields, got %d", len(ts.Fields))
+	}
+
+	if len(ts.FieldsC) != 2 {
+		t.Errorf("Expected 2 fields, got %d", len(ts.FieldsC))
+	}
+
+	if len(ts.DoFieldsC) != 2 {
+		t.Errorf("Expected 2 fields, got %d", len(ts.DoFieldsC))
+	}
+
+	if len(ts.CountsC) != 2 {
+		t.Errorf("Expected 2 fields, got %d", len(ts.CountsC))
+	}
+
+	if len(ts.IDsC) != 3 {
+		t.Errorf("Expected 3 fields, got %d", len(ts.IDsC))
+	}
+
+	if len(ts.Float32sC) != 3 {
+		t.Errorf("Expected 3 fields, got %d", len(ts.IDsC))
 	}
 }
 
