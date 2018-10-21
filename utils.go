@@ -34,13 +34,21 @@ func isEmptyValue(v reflect.Value) bool {
 
 // parseTag splits a struct field's qstring tag into its name and, if an
 // optional omitempty option was provided, a boolean indicating this is
-// returned
-func parseTag(tag string) (string, bool) {
-	if idx := strings.Index(tag, ","); idx != -1 {
-		if tag[idx+1:] == "omitempty" {
-			return tag[:idx], true
-		}
-		return tag[:idx], false
+// returned and a boolean
+func parseTag(tag string) (name string, omitempty bool, comma bool) {
+	elements := strings.Split(tag, ",")
+	if len(elements) == 1 {
+		return tag, false, false
 	}
-	return tag, false
+
+	name = elements[0]
+	for _, opt := range elements[1:] {
+		if opt == "omitempty" {
+			omitempty = true
+		}
+		if opt == "comma" {
+			comma = true
+		}
+	}
+	return
 }

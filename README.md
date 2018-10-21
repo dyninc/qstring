@@ -177,6 +177,10 @@ you've come to know and love from Go (un)marshalers.
   * A field tag with a value of `qstring:"-"` instructs `qstring` to ignore the field.
   * A field tag with an the `omitempty` option set will be ignored if the field
 	being marshaled has a zero value. `qstring:"name,omitempty"`
+  * A slice field tag with the `comma` option set will produce a comma-separated list
+	of items in a single query parameter instead of multiple instances of the
+	parameter. `qstring:"names,comma"` will produce `?names=a,b,c` instead of
+	`?names=a&names=b&names=c`.
 
 ### Custom Fields
 In order to facilitate more complex queries `qstring` also provides some custom

@@ -49,26 +49,35 @@ func TestTagParsing(t *testing.T) {
 		inp    string
 		output string
 		omit   bool
+		comma  bool
 	}{
-		{inp: "name,omitempty", output: "name", omit: true},
-		{inp: "name", output: "name", omit: false},
-		{inp: "name,", output: "name", omit: false},
-		{inp: "name", output: "name", omit: false},
-		{inp: "", output: "", omit: false},
-		{inp: ",omitempty", output: "", omit: true},
-		{inp: "-", output: "-", omit: false},
+		{inp: "name,omitempty", output: "name", omit: true, comma: false},
+		{inp: "name", output: "name", omit: false, comma: false},
+		{inp: "name,", output: "name", omit: false, comma: false},
+		{inp: "name", output: "name", omit: false, comma: false},
+		{inp: "", output: "", omit: false, comma: false},
+		{inp: ",omitempty", output: "", omit: true, comma: false},
+		{inp: "-", output: "-", omit: false, comma: false},
+		{inp: "name,omitempty,comma", output: "name", omit: true, comma: true},
+		{inp: "name,comma", output: "name", omit: false, comma: true},
+		{inp: "name,comma,", output: "name", omit: false, comma: true},
 	}
 
 	var name string
 	var omit bool
+	var comma bool
 	for _, test := range testio {
-		name, omit = parseTag(test.inp)
+		name, omit, comma = parseTag(test.inp)
 		if name != test.output {
 			t.Errorf("Expected tag name to be %q, got %q instead", test.output, name)
 		}
 
 		if omit != test.omit {
 			t.Errorf("Expected omitempty to be %t, got %t instead", test.omit, omit)
+		}
+
+		if comma != test.comma {
+			t.Errorf("Expected comma to be %t, got %t instead", test.comma, comma)
 		}
 	}
 }

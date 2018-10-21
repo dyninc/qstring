@@ -81,7 +81,7 @@ func (e *encoder) value(val reflect.Value) (url.Values, error) {
 		// pull out the qstring struct tag
 		elemField := elem.Field(i)
 		typField := typ.Field(i)
-		qstring, omit := parseTag(typField.Tag.Get(Tag))
+		qstring, omit, comma := parseTag(typField.Tag.Get(Tag))
 		if qstring == "" {
 			// resolvable fields must have at least the `flag` struct tag
 			qstring = strings.ToLower(typField.Name)
@@ -98,7 +98,7 @@ func (e *encoder) value(val reflect.Value) (url.Values, error) {
 		default:
 			output.Set(qstring, marshalValue(elemField, k))
 		case reflect.Slice:
-			output[qstring] = marshalSlice(elemField)
+			output[qstring] = marshalSlice(elemField, comma)
 		case reflect.Ptr:
 			marshalStruct(output, qstring, reflect.Indirect(elemField), k)
 		case reflect.Struct:
@@ -108,10 +108,13 @@ func (e *encoder) value(val reflect.Value) (url.Values, error) {
 	return output, err
 }
 
-func marshalSlice(field reflect.Value) []string {
+func marshalSlice(field reflect.Value, comma bool) []string {
 	var out []string
 	for i := 0; i < field.Len(); i++ {
 		out = append(out, marshalValue(field.Index(i), field.Index(i).Kind()))
+	}
+	if comma {
+		return []string{strings.Join(out, ",")}
 	}
 	return out
 }
