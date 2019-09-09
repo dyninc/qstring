@@ -49,7 +49,9 @@ type TestStruct struct {
 	Float32s []float32
 	Float64s []float64
 	hidden   int
-	Hidden   int `qstring:"-"`
+	Hidden   int       `qstring:"-"`
+	PtrInt   *int      `qstring:"ptrInt"`
+	PtrNil   *struct{} `qstring:"ptrNil"`
 }
 
 func TestUnmarshall(t *testing.T) {
@@ -83,6 +85,7 @@ func TestUnmarshall(t *testing.T) {
 		"ubigs":    []string{"12", "13", "14"},
 		"float32s": []string{"6000", "6001", "6002"},
 		"float64s": []string{"7000", "7001", "7002"},
+		"ptrInt":   []string{"10"},
 	}
 
 	err := Unmarshal(query, &ts)
@@ -96,6 +99,14 @@ func TestUnmarshall(t *testing.T) {
 
 	if len(ts.Fields) != 2 {
 		t.Errorf("Expected 2 fields, got %d", len(ts.Fields))
+	}
+
+	if *ts.PtrInt != 10 {
+		t.Errorf("Wrong PtrInt value: %v", ts.PtrInt)
+	}
+
+	if ts.PtrNil != nil {
+		t.Errorf("Wrong PtrNil value: %v", ts.PtrNil)
 	}
 }
 
