@@ -73,14 +73,14 @@ func (e *encoder) marshal() (url.Values, error) {
 
 func (e *encoder) value(val reflect.Value) (url.Values, error) {
 	elem := val.Elem()
-	typ := elem.Type()
+	elemType := elem.Type()
 
 	var err error
 	var output = make(url.Values)
 	for i := 0; i < elem.NumField(); i++ {
 		// pull out the qstring struct tag
 		elemField := elem.Field(i)
-		typField := typ.Field(i)
+		typField := elemType.Field(i)
 		qstring, omit := parseTag(typField.Tag.Get(Tag))
 		if qstring == "" {
 			// resolvable fields must have at least the `flag` struct tag
@@ -93,16 +93,28 @@ func (e *encoder) value(val reflect.Value) (url.Values, error) {
 			continue
 		}
 
+		var typFieldCheck reflect.Type
+
+		if typField.Type.Kind() == reflect.Ptr {
+			typFieldCheck = typField.Type.Elem()
+			if elemField.IsNil() {
+				continue
+			}
+			elemField = elemField.Elem()
+		} else {
+			typFieldCheck = typField.Type
+		}
+
 		// only do work if the current fields query string parameter was provided
-		switch k := typField.Type.Kind(); k {
+		switch k := typFieldCheck.Kind(); k {
 		default:
 			output.Set(qstring, marshalValue(elemField, k))
 		case reflect.Slice:
 			output[qstring] = marshalSlice(elemField)
-		case reflect.Ptr:
-			marshalStruct(output, qstring, reflect.Indirect(elemField), k)
 		case reflect.Struct:
-			marshalStruct(output, qstring, elemField, k)
+			if err := marshalStruct(output, qstring, elemField, k); err != nil {
+				return nil, err
+			}
 		}
 	}
 	return output, err

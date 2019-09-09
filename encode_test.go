@@ -8,6 +8,7 @@ import (
 )
 
 func TestMarshallString(t *testing.T) {
+	i := 10
 	ts := TestStruct{
 		Name:     "SomeName",
 		Do:       true,
@@ -37,6 +38,8 @@ func TestMarshallString(t *testing.T) {
 		UBigs:    []uint64{12, 13},
 		Float32s: []float32{6000, 6001},
 		Float64s: []float64{7000, 7001},
+		PtrInt:   &i,
+		PtrNil:   nil,
 	}
 
 	expected := []string{"name=SomeName", "do=true", "page=1", "id=12", "small=13",
@@ -46,7 +49,7 @@ func TestMarshallString(t *testing.T) {
 		"smalls=7", "meds=9", "meds=10", "bigs=12", "bigs=13", "upages=2",
 		"upages=3", "uids=5", "uids=6", "usmalls=8", "usmalls=9", "umeds=9",
 		"umeds=10", "ubigs=12", "ubigs=13", "float32s=6000", "float32s=6001",
-		"float64s=7000", "float64s=7001"}
+		"float64s=7000", "float64s=7001", "ptrInt=10"}
 	query, err := MarshalString(&ts)
 	if err != nil {
 		t.Fatal(err.Error())
@@ -60,6 +63,7 @@ func TestMarshallString(t *testing.T) {
 }
 
 func TestMarshallValues(t *testing.T) {
+	i := 10
 	ts := TestStruct{
 		Name:     "SomeName",
 		Do:       true,
@@ -89,6 +93,8 @@ func TestMarshallValues(t *testing.T) {
 		UBigs:    []uint64{12, 13},
 		Float32s: []float32{6000, 6001},
 		Float64s: []float64{7000, 7001},
+		PtrInt:   &i,
+		PtrNil:   nil,
 	}
 
 	expected := url.Values{
@@ -120,6 +126,7 @@ func TestMarshallValues(t *testing.T) {
 		"ubigs":    []string{"12", "13", "14"},
 		"float32s": []string{"6000", "6001", "6002"},
 		"float64s": []string{"7000", "7001", "7002"},
+		"ptrInt":   []string{"10"},
 	}
 	values, err := Marshal(&ts)
 	if err != nil {
@@ -129,6 +136,9 @@ func TestMarshallValues(t *testing.T) {
 	if len(values) != len(expected) {
 		t.Errorf("Expected %d fields, got %d. Hidden is %q",
 			len(expected), len(values), values["hidden"])
+	}
+	if values["ptrInt"][0] != expected["ptrInt"][0] {
+		t.Errorf("Wrong ptrInt value: %v", values["ptrInt"][0])
 	}
 }
 
