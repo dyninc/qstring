@@ -19,6 +19,9 @@ const (
 
 // parseOperator parses a leading logical operator out of the provided string
 func parseOperator(s string) string {
+	if len(s) == 0 {
+		return ""
+	}
 	switch s[0] {
 	case operatorLesser[0]: // "<"
 		if 1 == len(s) {
@@ -98,13 +101,9 @@ func (c ComparativeTime) String() string {
 
 // Parse is used to parse a query string into a ComparativeString instance
 func (c *ComparativeString) Parse(query string) error {
-	if len(query) <= 2 {
-		return errors.New("qstring: Invalid Query")
-	}
-
 	c.Operator = parseOperator(query)
 
-	if c.Operator != operatorDifferent && c.Operator != operatorLike && c.Operator != operatorEquals {
+	if len(c.Operator) > 0 && c.Operator != operatorDifferent && c.Operator != operatorLike && c.Operator != operatorEquals {
 		return errors.New(fmt.Sprintf("qstring: Invalid operator for %T", c))
 	}
 	if c.Operator == operatorEquals {
@@ -128,5 +127,8 @@ func (c *ComparativeString) Parse(query string) error {
 // String returns this ComparativeString instance in the form of the query
 // parameter that it came in on
 func (c ComparativeString) String() string {
+	if c.Operator == operatorEquals {
+		c.Operator = ""
+	}
 	return fmt.Sprintf("%s%s", c.Operator, c.Str)
 }
