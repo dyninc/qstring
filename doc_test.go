@@ -6,7 +6,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/dyninc/qstring"
+	"github.com/mariusor/qstring"
 )
 
 func ExampleUnmarshal() {
