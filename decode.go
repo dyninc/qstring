@@ -152,6 +152,12 @@ func (d *decoder) coerce(query string, target reflect.Kind, field reflect.Value)
 			if err == nil {
 				field.Set(reflect.ValueOf(t))
 			}
+		case ComparativeString:
+			s := ComparativeString{}
+			err = s.Parse(query)
+			if err == nil {
+				field.Set(reflect.ValueOf(s))
+			}
 		default:
 			d.value(field)
 		}
