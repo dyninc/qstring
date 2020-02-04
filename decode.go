@@ -96,10 +96,6 @@ func (d *decoder) value(val reflect.Value) error {
 				err = d.value(elemField.Addr())
 			}
 		} else if typField.Type.Kind() == reflect.Ptr {
-			if elemField.IsNil() {
-				elemField.Set(reflect.New(typField.Type.Elem()))
-				elemField = elemField.Elem()
-			}
 			recQuery := make(url.Values)
 			pref := qstring + "."
 			for k, v := range d.data {
@@ -109,6 +105,10 @@ func (d *decoder) value(val reflect.Value) error {
 				}
 			}
 			if len(recQuery) > 0 {
+				if elemField.IsNil() {
+					elemField.Set(reflect.New(typField.Type.Elem()))
+					elemField = elemField.Elem()
+				}
 				temp := d.data
 				d.data = recQuery
 				if elemField.CanAddr() {
