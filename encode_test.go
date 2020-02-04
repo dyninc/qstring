@@ -334,8 +334,8 @@ func TestMarshalTextMarshalType(t *testing.T) {
 }
 
 type RecursiveStruct struct {
-	Value  string           `qstring:"value"`
 	Object *RecursiveStruct `qstring:"object,omitempty"`
+	Value  string           `qstring:"value"`
 }
 
 func TestMarshalEmbeddedStruct(t *testing.T) {
