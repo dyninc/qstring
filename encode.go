@@ -105,14 +105,14 @@ func (e *encoder) value(val reflect.Value) (url.Values, error) {
 		}
 		// only do work if the current fields query string parameter was provided
 		switch k := typField.Type.Kind(); k {
-		default:
-			output.Set(qstring, marshalValue(elemField, k))
 		case reflect.Slice:
 			output[qstring] = marshalSlice(elemField)
 		case reflect.Ptr:
 			marshalStruct(output, qstring, reflect.Indirect(elemField), k)
 		case reflect.Struct:
 			marshalStruct(output, qstring, elemField, k)
+		default:
+			output.Set(qstring, marshalValue(elemField, k))
 		}
 	}
 	return output, err
@@ -181,6 +181,9 @@ func marshalStruct(output url.Values, qstring string, field reflect.Value, sourc
 			return err
 		}
 		for key, list := range vals {
+			if qstring != "" {
+				key = qstring + "." + key
+			}
 			output[key] = list
 		}
 	}

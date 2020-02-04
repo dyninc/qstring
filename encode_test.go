@@ -294,11 +294,12 @@ func TestMarshaller(t *testing.T) {
 		}
 	}
 }
+
 type MyText []byte
 type MyOtherText []byte
 
 type MyStruct struct {
-	Text MyText
+	Text  MyText
 	Other MyOtherText
 }
 
@@ -310,7 +311,7 @@ func (m MyOtherText) String() string {
 }
 
 func TestMarshalTextMarshalType(t *testing.T) {
-	el := MyStruct{ Text: MyText("example string"), Other: MyOtherText("second example")}
+	el := MyStruct{Text: MyText("example string"), Other: MyOtherText("second example")}
 
 	result, err := MarshalString(&el)
 	if err != nil {
@@ -325,6 +326,39 @@ func TestMarshalTextMarshalType(t *testing.T) {
 
 	// ensure fields we expect to be present are
 	expected := []string{"text=example string", "other=second example"}
+	for _, q := range expected {
+		if !strings.Contains(unescaped, q) {
+			t.Errorf("Expected query string %s to contain %s", unescaped, q)
+		}
+	}
+}
+
+type RecursiveStruct struct {
+	Value  string           `qstring:"value"`
+	Object *RecursiveStruct `qstring:"object,omitempty"`
+}
+
+func TestMarshalEmbeddedStruct(t *testing.T) {
+	rec := RecursiveStruct{
+		Value: "example",
+		Object: &RecursiveStruct{
+			Value: "embedded-example",
+		},
+	}
+
+	result, err := MarshalString(&rec)
+	if err != nil {
+		t.Fatalf("Unable to marshal type %T: %s", rec, err.Error())
+	}
+
+	var unescaped string
+	unescaped, err = url.QueryUnescape(result)
+	if err != nil {
+		t.Fatalf("Unable to unescape query string %q: %q", result, err.Error())
+	}
+
+	// ensure fields we expect to be present are
+	expected := []string{"value=example", "object.value=embedded-example"}
 	for _, q := range expected {
 		if !strings.Contains(unescaped, q) {
 			t.Errorf("Expected query string %s to contain %s", unescaped, q)
