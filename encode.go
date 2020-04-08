@@ -1,6 +1,8 @@
 package qstring
 
 import (
+	"encoding"
+	"fmt"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -71,6 +73,9 @@ func (e *encoder) marshal() (url.Values, error) {
 	}
 }
 
+var textMarshallerElem = reflect.TypeOf(new(encoding.TextMarshaler)).Elem()
+var stringerElem = reflect.TypeOf(new(fmt.Stringer)).Elem()
+
 func (e *encoder) value(val reflect.Value) (url.Values, error) {
 	elem := val.Elem()
 	typ := elem.Type()
@@ -93,16 +98,21 @@ func (e *encoder) value(val reflect.Value) (url.Values, error) {
 			continue
 		}
 
+		// verify if the element type implements compatible interfaces
+		if val, ok := compatibleInterfaceValue(elemField); ok {
+			output.Set(qstring, val)
+			continue
+		}
 		// only do work if the current fields query string parameter was provided
 		switch k := typField.Type.Kind(); k {
-		default:
-			output.Set(qstring, marshalValue(elemField, k))
 		case reflect.Slice:
 			output[qstring] = marshalSlice(elemField)
 		case reflect.Ptr:
 			marshalStruct(output, qstring, reflect.Indirect(elemField), k)
 		case reflect.Struct:
 			marshalStruct(output, qstring, elemField, k)
+		default:
+			output.Set(qstring, marshalValue(elemField, k))
 		}
 	}
 	return output, err
@@ -116,7 +126,21 @@ func marshalSlice(field reflect.Value) []string {
 	return out
 }
 
+func compatibleInterfaceValue(field reflect.Value) (string, bool) {
+	if field.Type().Implements(textMarshallerElem) {
+		byt, _ := field.Interface().(encoding.TextMarshaler).MarshalText()
+		return string(byt), true
+	}
+	if field.Type().Implements(stringerElem) {
+		return field.Interface().(fmt.Stringer).String(), true
+	}
+	return "", false
+}
+
 func marshalValue(field reflect.Value, source reflect.Kind) string {
+	if val, ok := compatibleInterfaceValue(field); ok {
+		return val
+	}
 	switch source {
 	case reflect.String:
 		return field.String()
@@ -130,6 +154,9 @@ func marshalValue(field reflect.Value, source reflect.Kind) string {
 		return strconv.FormatFloat(field.Float(), 'G', -1, 64)
 	case reflect.Struct:
 		switch field.Interface().(type) {
+		case encoding.TextMarshaler:
+			byt, _ := field.Interface().(encoding.TextMarshaler).MarshalText()
+			return string(byt)
 		case time.Time:
 			return field.Interface().(time.Time).Format(time.RFC3339)
 		case ComparativeTime:
@@ -154,6 +181,9 @@ func marshalStruct(output url.Values, qstring string, field reflect.Value, sourc
 			return err
 		}
 		for key, list := range vals {
+			if qstring != "" {
+				key = qstring + "." + key
+			}
 			output[key] = list
 		}
 	}

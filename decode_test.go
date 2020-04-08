@@ -212,3 +212,36 @@ func TestUnmarshaller(t *testing.T) {
 		}
 	}
 }
+
+func TestUnmarshalEmbeddedStruct(t *testing.T) {
+	testIO := []struct {
+		inp      url.Values
+		err interface{}
+		expected *RecursiveStruct
+	}{
+		{
+			url.Values{"object.value": []string{"embedded-example"}, "value": []string{"example"},},
+			nil,
+			&RecursiveStruct{
+				Object: &RecursiveStruct{
+					Value:  "embedded-example",
+				},
+				Value:  "example",
+			},
+		},
+	}
+	s := &RecursiveStruct{}
+	for _, test := range testIO {
+		err := Unmarshal(test.inp, s)
+		if err != test.err {
+			t.Errorf("Expected Unmarshaller to return %s, but got %s instead", test.err, err)
+		}
+		if !(test.expected.Value == s.Value) {
+			t.Errorf("Expected Unmarshaller to return %s, but got %s instead", test.expected.Value, s.Value)
+		}
+		if !(test.expected.Object.Value == s.Object.Value) {
+			t.Errorf("Expected Unmarshaller to return %s, but got %s instead", test.expected.Object.Value, s.Object.Value)
+		}
+	}
+
+}

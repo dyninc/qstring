@@ -1,12 +1,10 @@
-package qstring_test
+package qstring
 
 import (
 	"fmt"
 	"net/url"
 	"os"
 	"time"
-
-	"github.com/dyninc/qstring"
 )
 
 func ExampleUnmarshal() {
@@ -19,7 +17,7 @@ func ExampleUnmarshal() {
 
 	query := &Query{}
 	qValues, _ := url.ParseQuery("names=foo&names=bar&limit=50&page=1")
-	err := qstring.Unmarshal(qValues, query)
+	err := Unmarshal(qValues, query)
 	if err != nil {
 		panic("Unable to Parse Query String")
 	}
@@ -41,7 +39,7 @@ func ExampleMarshalString() {
 		Limit: 50,
 		Page:  1,
 	}
-	q, _ := qstring.MarshalString(query)
+	q, _ := MarshalString(query)
 	os.Stdout.Write([]byte(q))
 	// Output: limit=50&names=foo&names=bar&page=1
 }
@@ -62,7 +60,7 @@ func ExampleUnmarshal_complex() {
 	}
 	query := &Query{}
 	qValues, _ := url.ParseQuery("names=foo&names=bar&limit=50&page=1&ids=1&ids=2&created=2006-01-02T15:04:05Z")
-	err := qstring.Unmarshal(qValues, query)
+	err := Unmarshal(qValues, query)
 	if err != nil {
 		panic("Unable to Parse Query String")
 	}
@@ -70,13 +68,13 @@ func ExampleUnmarshal_complex() {
 
 func ExampleComparativeTime() {
 	type DateQuery struct {
-		Created  qstring.ComparativeTime
-		Modified qstring.ComparativeTime
+		Created  ComparativeTime
+		Modified ComparativeTime
 	}
 
 	var query DateQuery
 	qValues, _ := url.ParseQuery("created=>=2006-01-02T15:04:05Z&modified=<=2016-01-01T15:04Z")
-	err := qstring.Unmarshal(qValues, &query)
+	err := Unmarshal(qValues, &query)
 	if err != nil {
 		panic("Unable to Parse Query String")
 	}

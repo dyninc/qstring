@@ -95,6 +95,27 @@ func (d *decoder) value(val reflect.Value) error {
 			if elemField.CanAddr() {
 				err = d.value(elemField.Addr())
 			}
+		} else if typField.Type.Kind() == reflect.Ptr {
+			recQuery := make(url.Values)
+			pref := qstring + "."
+			for k, v := range d.data {
+				if strings.HasPrefix(k, pref) {
+					key := strings.Replace(k, pref, "", 1)
+					recQuery[key] = v
+				}
+			}
+			if len(recQuery) > 0 {
+				if elemField.IsNil() {
+					elemField.Set(reflect.New(typField.Type.Elem()))
+					elemField = elemField.Elem()
+				}
+				temp := d.data
+				d.data = recQuery
+				if elemField.CanAddr() {
+					err = d.value(elemField.Addr())
+				}
+				d.data = temp
+			}
 		}
 		if err != nil {
 			return err
@@ -151,6 +172,12 @@ func (d *decoder) coerce(query string, target reflect.Kind, field reflect.Value)
 			err = t.Parse(query)
 			if err == nil {
 				field.Set(reflect.ValueOf(t))
+			}
+		case ComparativeString:
+			s := ComparativeString{}
+			err = s.Parse(query)
+			if err == nil {
+				field.Set(reflect.ValueOf(s))
 			}
 		default:
 			d.value(field)
